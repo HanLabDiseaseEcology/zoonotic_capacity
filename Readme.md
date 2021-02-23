@@ -1,0 +1,1 @@
+This repo has R code and input data files for the boosted regression tree models in the preprint "Predicting the zoonotic capacity of mammal species for SARS-CoV-2" (https://www.biorxiv.org/content/10.1101/2021.02.18.431844v1). 
