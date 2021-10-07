@@ -8,7 +8,6 @@ knitr::opts_chunk$set(echo = TRUE)
 #knitr::knit("zoonotic_capacity.Rmd", output = "html_document")
 ```
 
-
 #####install packages
 ```{r packages, include = FALSE}
 
@@ -21,7 +20,7 @@ pkgTest <- function(x)
   }
   library(x, character.only = TRUE)
 }
-neededPackages <- c( "ggplot2",  "plyr", "foreach","broom", "remotes", "stringr",  "data.table",  "Hmisc", "caret", "ggforce",  "gbm", "caret", "Matrix", "pdp", "caTools", "ROCR", "dplyr", "dismo", "doSNOW",  "tidyverse",  "patchwork", "gtable", "magrittr",  "fulltext",  "operator.tools", "stringi", "tidyr", "knitr")
+neededPackages <- c( "ggplot2",  "plyr", "foreach","broom", "remotes", "stringr",  "data.table",  "Hmisc", "caret", "ggforce",  "gbm", "caret", "Matrix", "pdp", "caTools", "ROCR", "dplyr", "dismo", "doSNOW",  "tidyverse",  "patchwork", "gtable", "magrittr",  "fulltext",  "operator.tools", "stringi", "tidyr", "knitr", "parallel")
 for (package in neededPackages){pkgTest(package)}
 
 ```
@@ -48,7 +47,8 @@ save(pred_sum_out, file = "output/pred_sum_out.Rdata")
 
 ##cores
 ```{r, include = FALSE}
-cores = 4#check this is no more than half the number of cores available
+check_cores = detectCores(TRUE)#find how many cores are available for parallel processing
+cores = check_cores/4#note: this may need to be changed to use no more than half the number of cores available
 cl <- makeCluster(cores, "SOCK", timeout = 60)  
 registerDoSNOW(cl)
 
@@ -58,67 +58,74 @@ registerDoSNOW(cl)
   
 ```
 
+#This is the zoonotic capacity model that had the highest accuracy.   
 ##zoonotic capacity, mammals, include only wild species in training data
 ```{r wild_only -129_imputed zoonotic capacity}
 source("code/remove_temp_data.R")
-##do analysis, mammals, imputed, wild only, haddock_infected_and_below (-129), include forstrat
-source("code/wild_only_zoonotic_capacity_include_forstrat_conservative_deviance_2.R")
+source("code/wild_only_zoonotic_capacity_include_forstrat_conservative_deviance_2.R")#this script defines the model 
 
 #define hyperparameters based on best test AUC for parameter set that has good deviance curve
-source("code/R_run_gridSearch.R") 
-source("code/deviance_plots_all.R")#examine plots
-#look at, only eta 0.0001 has okay curves
-hyper_grid = subset(hyper_grid, eta == 0.0001)
-#choose the best parameters (highest AUC w/ also good deviance curve)
+source("code/R_run_gridSearch.R")#run gridSearch function to evaluate alternative hyperparameter combinations and how they perform 
+source("code/deviance_plots_all.R")#examine plots for each hyperparameter combination
+#Look at curves and pick the best parameters, which have highest AUC while also having a relatively flat test deviance curve and having optimal trees fewer than the max trees. 
+#Pick parameters
 eta = 0.0001
 max_depth = 2
 n.minobsinnode = 5
 
+#Plot deviance curve for just these hyperparameters as double-check that we picked the hyperparameter combo we intended to. 
 source("code/deviance_plot_defined.R")
 ##run scripts
 source("code/scripts.R")
 ##now do one shot of making predictions with all of the available data and with the same set of hyperparameters as used in "conservative_depth_2"
-source("code/wild_only_zoonotic_capacity_include_forstrat_cons_dev_2_one_iteration.R")
+source("code/wild_only_zoonotic_capacity_include_forstrat_cons_dev_2_one_iteration.R")#define model
 source("code/run_bootstrapGBM_predictions_one_iteration.R")
 ```
 
+##################################################################################################################################
+###Below here are code chunks for running every other model formulation that we evaluated and found to be relatively uninformative. The code is commented out. The code can be run by taking out the comments. For more info on these alternative models see Supplementary Methods and Supplementary Table 4 (available here: https://doi.org/10.25390/caryinstitute.c.5293339)
+
 ##do analysis, mammals, imputed, wild and non-wild, haddock_infected_and_below (-129)
 ```{r wild_non_wild_zoonotic_capacity}
-source("code/wild_non_wild_zoonotic_capacity.R")
+#source("code/wild_non_wild_zoonotic_capacity.R")
+
 ```
 
 ##mammals, imputed, haddock_score_mean
 ```{r mammals_haddock.R}
-source("code/mammals_haddock.R")
+#source("code/mammals_haddock.R")
+
 ```
 
 ##mammals, imputed, AA_30_negative
 ```{r mammals, imputed, AA_30_negative}
-source("code/mammals_AA_haddock.R")
+#source("code/mammals_AA_haddock.R")
+
 ```
 
-##vertebrates, zoonotic capacity
+#all #vertebrates, zoonotic capacity
 ```{r vertebrates_zoonotic_capacity.R}
-source("code/vertebrates_zoonotic_capacity.R")
+#source("code/vertebrates_zoonotic_capacity.R")
+
 ```
 
-##vertebrates, haddock_score_mean
+##all vertebrates, haddock_score_mean
 ```{r vertebrates_haddock.R}
-source("code/vertebrates_haddock.R")
+#source("code/vertebrates_haddock.R")
 ```
 
 ##vertebrates, AA 30
 ```{r vertebrates_AA_haddock.R}
-source("code/vertebrates_AA_haddock.R")
+#source("code/vertebrates_AA_haddock.R")
 ```
 
-##write outputs -- performance_out and DF_merge_out
+##write outputs -- performance_out and DF_merge_out. Make csv file that has performance metrics for all models run.  
 ```{r performance}
-source("code/remove_temp_data.R")
-load("output/performance_out.Rdata")
-load("output/pred_sum_out.Rdata")
-write.csv(performance_out, paste0("output/performance_models", ".csv"))
-save(pred_sum_out, file = "output/pred_sum_out.Rdata")
+#source("code/remove_temp_data.R")
+#load("output/performance_out.Rdata")
+#load("output/pred_sum_out.Rdata")
+#write.csv(performance_out, paste0("output/performance_models", ".csv"))
+#save(pred_sum_out, file = "output/pred_sum_out.Rdata")
 ```
 
 ##find out how long it takes to run
