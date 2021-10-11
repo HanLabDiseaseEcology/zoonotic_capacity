@@ -2,6 +2,7 @@ names_df = names(DF)
 
 #remove variables with near zero variation
 sp_ind = which(names(DF)=="Species")
+#Use a 95/5 ratio as "the cutoff for the ratio of the most common value to the second most common value" (quoting definition from function documentation)
 nzv = nearZeroVar(DF, freqCut = 95/5, saveMetrics = TRUE)
 okay_inds = which(nzv$nzv == FALSE)
 

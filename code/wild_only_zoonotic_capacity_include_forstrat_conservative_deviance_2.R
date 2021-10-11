@@ -5,7 +5,7 @@ source("code/R_setup.R")
 file_in = DF_train_mammal_name_wild_only
   DF = read.csv(file_in)
   source("code/R_haddock_infected_and_below_129.R")#assign haddock_infected_and_below  
-  source("code/nzv.R")
+  source("code/nzv.R")#Function to identify and remove any predictor fields with near-zero variation. 
   
   save(DF, file = "input/DF_tmp.Rdata")
   #data for all mammals for predictions

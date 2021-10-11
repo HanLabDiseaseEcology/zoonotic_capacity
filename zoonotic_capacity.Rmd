@@ -8,7 +8,8 @@ knitr::opts_chunk$set(echo = TRUE)
 #knitr::knit("zoonotic_capacity.Rmd", output = "html_document")
 ```
 
-#####install packages
+#1. 
+#####install packages needed  
 ```{r packages, include = FALSE}
 
 library(tidyr)
@@ -25,6 +26,7 @@ for (package in neededPackages){pkgTest(package)}
 
 ```
 
+#2. 
 #folders -- create output and figure folders and delete files in them if they already exist
 ```{r folder}
 mainDir = c("output", "figure")
@@ -45,6 +47,7 @@ save(pred_sum_out, file = "output/pred_sum_out.Rdata")
 
 ```
 
+#3.
 ##cores
 ```{r, include = FALSE}
 check_cores = detectCores(TRUE)#find how many cores are available for parallel processing
@@ -58,29 +61,43 @@ registerDoSNOW(cl)
   
 ```
 
-#This is the zoonotic capacity model that had the highest accuracy.   
-##zoonotic capacity, mammals, include only wild species in training data
+#4. 
+#Define data and model. #This is the zoonotic capacity model that had the highest accuracy, including only wild species in the training and test data. 
 ```{r wild_only -129_imputed zoonotic capacity}
-source("code/remove_temp_data.R")
-source("code/wild_only_zoonotic_capacity_include_forstrat_conservative_deviance_2.R")#this script defines the model 
+source("code/remove_temp_data.R")#remove any temporary data 
+source("code/wild_only_zoonotic_capacity_include_forstrat_conservative_deviance_2.R")#this script defines the model and removes fields with near-zero variation 
 
-#define hyperparameters based on best test AUC for parameter set that has good deviance curve
+```
+
+#5.
+#This code chunk carries out grid search. 
+```{r grid_search wild_only zoonotic capacity }
+
 source("code/R_run_gridSearch.R")#run gridSearch function to evaluate alternative hyperparameter combinations and how they perform 
-source("code/deviance_plots_all.R")#examine plots for each hyperparameter combination
-#Look at curves and pick the best parameters, which have highest AUC while also having a relatively flat test deviance curve and having optimal trees fewer than the max trees. 
-#Pick parameters
+source("code/deviance_plots_all.R")#Make a subplot for the deviance curve for each hyperparameter combination
+#Look at the deviance curve, together with the test accuracy statistic (AUC), for each hyperparameter combination. Pick the best parameters, which have highest test AUC while also having a relatively flat test deviance curve and having optimal trees fewer than the maximum trees. 
+
+#Based on this evaluation, these are the hyperparameters we chose to use in modeling: 
 eta = 0.0001
 max_depth = 2
 n.minobsinnode = 5
 
-#Plot deviance curve for just these hyperparameters as double-check that we picked the hyperparameter combo we intended to. 
-source("code/deviance_plot_defined.R")
+source("code/deviance_plot_defined.R")#As a double-check that we picked the hyperparameter combo we intended to, plot deviance curve for just these hyperparameters. 
+```
+
+#6. Run bootstrapping of boosted regression tree modeling with chosen set of hyperparameters. 
+```{r bootstrapping wild_only zoonotic capacity}
 ##run scripts
 source("code/scripts.R")
-##now do one shot of making predictions with all of the available data and with the same set of hyperparameters as used in "conservative_depth_2"
+```
+
+#7.
+#make predictions once, using all available data. do one shot of making predictions with all of the available data and with the same set of hyperparameters as used in "conservative_depth_2"
+```{r predictions_once}
 source("code/wild_only_zoonotic_capacity_include_forstrat_cons_dev_2_one_iteration.R")#define model
 source("code/run_bootstrapGBM_predictions_one_iteration.R")
 ```
+
 
 ##################################################################################################################################
 ###Below here are code chunks for running every other model formulation that we evaluated and found to be relatively uninformative. The code is commented out. The code can be run by taking out the comments. For more info on these alternative models see Supplementary Methods and Supplementary Table 4 (available here: https://doi.org/10.25390/caryinstitute.c.5293339)

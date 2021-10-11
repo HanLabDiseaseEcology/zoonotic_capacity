@@ -1,11 +1,11 @@
 rm(list = ls())
-source("code/R_setup_params.R")
+source("code/R_setup_params.R")#run code setting some hyperparameters and input files
 
 k_split = k_split_performance#this is something less than 1
 
 load("input/df_model.Rdata")
 
-source("code/R_setup.R")
+source("code/R_setup.R")#Define helper functions
 load("input/DF_tmp.Rdata")
 
 source("code/fields_for_gbm.R")
