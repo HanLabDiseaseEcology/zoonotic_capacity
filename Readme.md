@@ -4,7 +4,7 @@ To reproduce analyses, download or clone this repo and run the R code found in z
 
 The file zoonotic_capacity.Rmd is an R Markdown file suitable for running in RStudio. zoonotic_capacity.Rmd contains code that installs and loads the necessary packages and sources *.R scripts (in folder "code") to carry out the modeling. zoonotic_capacity.Rmd contains short descriptions of what each *.R file does.  
 
-Briefly, here are the steps implemented in the code:
+Briefly, here are the steps implemented in the code (numbers here match numbers in zoonotic_capacity.Rmd):
 
 1. Install and load needed packages. 
 

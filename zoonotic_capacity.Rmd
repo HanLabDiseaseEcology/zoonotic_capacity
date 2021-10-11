@@ -100,6 +100,7 @@ source("code/run_bootstrapGBM_predictions_one_iteration.R")
 
 
 ##################################################################################################################################
+#8. 
 ###Below here are code chunks for running every other model formulation that we evaluated and found to be relatively uninformative. The code is commented out. The code can be run by taking out the comments. For more info on these alternative models see Supplementary Methods and Supplementary Table 4 (available here: https://doi.org/10.25390/caryinstitute.c.5293339)
 
 ##do analysis, mammals, imputed, wild and non-wild, haddock_infected_and_below (-129)
